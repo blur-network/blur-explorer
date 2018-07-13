@@ -1,0 +1,11 @@
+build/*
+CMakeFiles
+**Makefile
+*.cmake
+CMakeCache.txt
+
+*.a
+*.o
+*.so
+xmrblocks
+grn
