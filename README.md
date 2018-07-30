@@ -22,15 +22,15 @@ The key features of the Blur Network Block Explorer are:
  - decoding outputs and proving txs sent to sub-address.
 
 
-## Compilation on Ubuntu 16.04
+## Compilation on Ubuntu
 
-##### Compile latest Monero development version
+##### Compile latest BLUR development version
 
 Download and compile recent Blur source  into your home folder:
 
 
 ```bash
-# first install monero dependecines
+# first install blur dependecines
 sudo apt update
 
 sudo apt-get install git build-essential cmake libboost-all-dev miniupnpc libunbound-dev graphviz doxygen libunwind8-dev pkg-config libssl-dev libcurl4-openssl-dev libgtest-dev libreadline-dev libzmq3-dev libsodium-dev
@@ -42,7 +42,7 @@ git clone --recursive https://github.com/blur-network/blur
 
 cd blur
 
-# checkout last monero version
+# checkout last blur version
 git checkout -b last_release v0.1.1
 
 cmake . && make 
@@ -50,18 +50,18 @@ cmake . && make
 
 ##### Compile and run the explorer
 
-Once the Monero is compiles, the explorer can be downloaded and compiled
+Once the Blur is compiled, the explorer can be downloaded and compiled
 as follows:
 
 ```bash
-# go to home folder if still in ~/monero
+# go to home folder if still in ~/blur
 cd ~
 
 # download the source code
-git clone https://github.com/moneroexamples/onion-monero-blockchain-explorer.git
+git clone https://github.com/blur-network/blur-explorer.git
 
 # enter the downloaded sourced code folder
-cd onion-monero-blockchain-explorer
+cd blur-explorer
 
 # make a build folder and enter it
 mkdir build && cd build
@@ -69,8 +69,8 @@ mkdir build && cd build
 # create the makefile
 cmake ..
 
-# altearnatively can use: cmake -DMONERO_DIR=/path/to/monero_folder ..
-# if monero is not in ~/monero
+# altearnatively can use: cmake -DMONERO_DIR=/path/to/blur_folder ..
+# if blur is not in ~/blur
 #
 # also can build with ASAN (sanitizers), for example
 # cmake -DSANITIZE_ADDRESS=On ..
@@ -89,12 +89,12 @@ To run it:
 ./xmrblocks
 ```
 
-By default it will look for blockchain in its default location i.e., `~/.bitmonero/lmdb`.
+By default it will look for blockchain in its default location i.e., `~/.blurnet/lmdb`.
 You can use `--bc-path` option if its in different location.
 Example output:
 
 ```bash
-[mwo@arch onion-monero-blockchain-explorer]$ ./xmrblocks
+$ ./xmrblocks
 2016-May-28 10:04:49.160280 Blockchain initialized. last block: 1056761, d0.h0.m12.s47 time ago, current difficulty: 1517857750
 (2016-05-28 02:04:49) [INFO    ] Crow/0.1 server is running, local port 8081
 ```
@@ -168,9 +168,9 @@ alias xmrblockstestnet='~/onion-monero-blockchain-explorer/build/xmrblocks -t --
 
 These are aliases similar to those used for http://139.162.32.245:8081/ and http://139.162.32.245:8082/, respectively.
 
-## Enable Monero emission
+## Enable Blur emission
 
-Obtaining current Monero emission amount is not straight forward. Thus, by default it is
+Obtaining current Blur emission amount is not straight forward. Thus, by default it is
 disabled. To enable it use `--enable-emission-monitor` flag, e.g.,
 
 
@@ -182,10 +182,10 @@ This flag will enable emission monitoring thread. When started, the thread
  will initially scan the entire blockchain, and calculate the cumulative emission based on each block.
 Since it is a separate thread, the explorer will work as usual during this time.
 Every 10000 blocks, the thread will save current emission in a file, by default,
- in `~/.bitmonero/lmdb/emission_amount.txt`. For testnet or stagenet networks,
- it is `~/.bitmonero/testnet/lmdb/emission_amount.txt` or `~/.bitmonero/stagenet/lmdb/emission_amount.txt`. This file is used so that we don't
+ in `~/.blurnet/lmdb/emission_amount.txt`. For testnet or stagenet networks,
+ it is `~/.blurnet/testnet/lmdb/emission_amount.txt` or `~/.blurnet/stagenet/lmdb/emission_amount.txt`. This file is used so that we don't
  need to rescan entire blockchain whenever the explorer is restarted. When the
- explorer restarts, the thread will first check if `~/.bitmonero/lmdb/emission_amount.txt`
+ explorer restarts, the thread will first check if `~/.blurnet/lmdb/emission_amount.txt`
  is present, read its values, and continue from there if possible. Subsequently, only the initial
  use of the tread is time consuming. Once the thread scans the entire blockchain, it updates
  the emission amount using new blocks as they come. Since the explorer writes this file, there can
@@ -199,10 +199,10 @@ Every 10000 blocks, the thread will save current emission in a file, by default,
  displayed on the front page, e.g., :
 
 ```
-Monero emission (fees) is 14485540.430 (52545.373) as of 1313448 block
+BLUR emission (fees) is 14485540.430 (52545.373) as of 1313448 block
 ```
 
-The values given, can be checked using Monero daemon's  `print_coinbase_tx_sum` command.
+The values given, can be checked using Blur daemon's  `print_coinbase_tx_sum` command.
 For example, for the above example: `print_coinbase_tx_sum 0 1313449`.
 
 To disable the monitor, simply restart the explorer without `--enable-emission-monitor` flag.
