@@ -3,7 +3,7 @@
 The key features of the Blur Network Block Explorer are:
 
  - no cookies, no web analytics trackers, no images,
- - by default no JavaScript, but can be enabled for client side decoding and proving transactions,
+ - Javascipt enabled for client side decoding and proving transactions, but not enabled by default
  - open sourced,
  - made fully in C++,
  - showing encrypted payments ID,
