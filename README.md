@@ -2,7 +2,8 @@
 
 The key features of the Blur Network Block Explorer are:
 
- - no cookies, no web analytics trackers, no images,
+ - no cookies, no web analytics trackers, no external images
+ - image in header is a png that has been base64 encoded
  - Javascipt enabled for client side decoding and proving transactions, but not enabled by default
  - open sourced,
  - made fully in C++,
