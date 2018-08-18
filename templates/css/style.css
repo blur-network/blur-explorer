@@ -1,8 +1,8 @@
 body {
     margin: 0;
     padding: 0;
-    color: darkgray;
-    background-color: #14272d;
+    color: #CC4C55;
+    background-color: #000924;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -17,7 +17,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 tr, li, #pages, .info {
-    font-family: "Lucida Console", Monaco, monospace;
+    font-family: "Lato", Lato, Noto Mono;
     font-size  : 12px;
     height: 22px;
 }
@@ -63,8 +63,8 @@ form {
 }
 .style-1 input[type="text"]:focus,
 .style-1 input[type="text"].focus {
-    border: solid 1px #707070;
-    box-shadow: 0 0 5px 1px #969696;
+    border: solid 1px #161638;
+    box-shadow: 0 0 5px 1px #161638;
 }
 
 
@@ -80,7 +80,7 @@ form {
 }
 
 .tab label {
-    background: #245668;
+    background: #100826;
     padding: 10px;
     border: 1px solid #ccc;
     margin-left: -1px;
@@ -96,7 +96,7 @@ form {
     position: absolute;
     top: 28px;
     left: 0;
-    background: #19313a;
+    background: #100826;
     right: 0;
     bottom: 0;
     padding: 20px;
@@ -104,7 +104,7 @@ form {
 }
 
 [type=radio]:checked ~ label {
-    background: #505050 ;
+    background: #161638 ;
     border-bottom: 1px solid white;
     z-index: 2;
 }

@@ -18,7 +18,7 @@ endif()
 
 
 if (NOT MONERO_DIR)
-    set(MONERO_DIR ../blur)
+    set(MONERO_DIR ../../blur)
 endif()
 
 message(STATUS MONERO_DIR ": ${MONERO_DIR}")
