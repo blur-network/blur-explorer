@@ -6,11 +6,7 @@ set(PROJECT_NAME
 
 project(${PROJECT_NAME})
 
-set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -std=c++14")
-
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
+set(CMAKE_CXX_STANDARD 14)
 
 if (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj -O3")
@@ -18,7 +14,7 @@ endif()
 
 
 if (NOT MONERO_DIR)
-    set(MONERO_DIR ../../blur)
+    set(MONERO_DIR ~/monero)
 endif()
 
 message(STATUS MONERO_DIR ": ${MONERO_DIR}")
@@ -27,7 +23,7 @@ set(MONERO_SOURCE_DIR ${MONERO_DIR}
         CACHE PATH "Path to the root directory for Monero")
 
 # set location of monero build tree
-set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}
+set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}/build/release/
         CACHE PATH "Path to the build directory for Monero")
 
 set(MY_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}/cmake"
@@ -110,6 +106,7 @@ set(LIBRARIES
         multisig
         daemonizer
         cncrypto
+        blocks
         lmdb
         ringct
         ringct_basic
@@ -130,7 +127,7 @@ set(LIBRARIES
 if(APPLE)
     set(LIBRARIES ${LIBRARIES} "-framework IOKit -framework PCSC")
 else()
-    set(LIBRARIES ${LIBRARIES} atomic)
+    set(LIBRARIES ${LIBRARIES} atomic pcsclite)
 endif()
 
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT WIN32)
