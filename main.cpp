@@ -286,6 +286,11 @@ main(int ac, const char* av[])
         return crow::response(xmrblocks.index2());
     });
 
+    CROW_ROUTE(app, "/supply")
+    ([&](const crow::request& req) {
+        return xmrblocks.supply();
+    });
+
     CROW_ROUTE(app, "/page/<uint>")
     ([&](size_t page_no) {
         return xmrblocks.index2(page_no);

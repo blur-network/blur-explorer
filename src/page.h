@@ -37,6 +37,7 @@
 #define TMPL_CSS_STYLES             TMPL_DIR "/css/style.css"
 #define TMPL_INDEX                  TMPL_DIR "/index.html"
 #define TMPL_INDEX2                 TMPL_DIR "/index2.html"
+#define TMPL_SUPPLY                 TMPL_DIR "/supply.html"
 #define TMPL_MEMPOOL                TMPL_DIR "/mempool.html"
 #define TMPL_ALTBLOCKS              TMPL_DIR "/altblocks.html"
 #define TMPL_MEMPOOL_ERROR          TMPL_DIR "/mempool_error.html"
@@ -396,6 +397,7 @@ public:
         template_file["header"]          = xmreg::read(TMPL_HEADER);
         template_file["footer"]          = get_footer();
         template_file["index2"]          = get_full_page(xmreg::read(TMPL_INDEX2));
+        template_file["supply"]          = get_full_page(xmreg::read(TMPL_SUPPLY));
         template_file["mempool"]         = xmreg::read(TMPL_MEMPOOL);
         template_file["altblocks"]       = get_full_page(xmreg::read(TMPL_ALTBLOCKS));
         template_file["mempool_error"]   = xmreg::read(TMPL_MEMPOOL_ERROR);
@@ -814,14 +816,13 @@ public:
         // perapre network info mstch::map for the front page
         string hash_rate;
 
-        if (testnet || stagenet)
-        {
-            hash_rate = std::to_string(current_network_info.hash_rate) + " H/s";
-        }
-        else
-        {
+        if (current_network_info.hash_rate > 1e6)
             hash_rate = fmt::format("{:0.3f} MH/s", current_network_info.hash_rate/1.0e6);
-        }
+        else if (current_network_info.hash_rate > 1e3)
+            hash_rate = fmt::format("{:0.3f} kH/s", current_network_info.hash_rate/1.0e3);
+        else
+            hash_rate = fmt::format("{:d} H/s", current_network_info.hash_rate);
+
 
         pair<string, string> network_info_age = get_age(local_copy_server_timestamp,
                                                         current_network_info.info_timestamp);
@@ -1261,6 +1262,25 @@ public:
 
         // render the page
         return mstch::render(template_file["block"], context);
+    }
+
+    string
+    supply()
+    {
+        if (!CurrentBlockchainStatus::is_thread_running())
+        {
+            return "Emission monitoring thread not enabled.";
+        }
+        else
+        {
+            CurrentBlockchainStatus::Emission current_values
+                    = CurrentBlockchainStatus::get_emission();
+
+            string emission_coinbase = xmr_amount_to_str(current_values.coinbase, "{:0.3f}");
+
+                    return emission_coinbase;
+        }
+
     }
 
 

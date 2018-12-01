@@ -1,8 +1,8 @@
 build/*
 CMakeFiles
 **Makefile
-*.cmake
 CMakeCache.txt
+*.swp 
 
 *.a
 *.o
