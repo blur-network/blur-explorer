@@ -106,16 +106,15 @@ set(LIBRARIES
         multisig
         daemonizer
         cncrypto
-        blocks
         lmdb
         ringct
         ringct_basic
         device
+        version
         common
         mnemonics
         easylogging
         checkpoints
-        version
         epee
         ${Boost_LIBRARIES}
         pthread
