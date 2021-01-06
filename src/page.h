@@ -746,7 +746,7 @@ public:
                     txd_map.insert({"height"    , i});
                     txd_map.insert({"blk_hash"  , blk_hash_str});
                     txd_map.insert({"age"       , age.first});
-                    txd_map.insert({"is_ringct" , (tx.version > 1)});
+                    txd_map.insert({"is_ringct" , (tx.version >= 1)});
                     txd_map.insert({"rct_type"  , tx.rct_signatures.type});
                     txd_map.insert({"blk_size"  , blk_size_str});
 
@@ -1882,8 +1882,8 @@ public:
                 with_additional = true;
             }
 
-            // if mine output has RingCT, i.e., tx version is 2
-            if (mine_output && tx.version == 2)
+            // if mine output has RingCT, i.e., tx version is >= 1 (always true for BLUR)
+            if (mine_output && tx.version >= 1)
             {
                 // cointbase txs have amounts in plain sight.
                 // so use amount from ringct, only for non-coinbase txs
@@ -2163,7 +2163,7 @@ public:
                     }
 
 
-                    if (mine_output && mixin_tx.version == 2)
+                    if (mine_output && mixin_tx.version >= 1)
                     {
                         // cointbase txs have amounts in plain sight.
                         // so use amount from ringct, only for non-coinbase txs
@@ -2187,7 +2187,7 @@ public:
 
                             amount = rct_amount;
 
-                        } // if (mine_output && mixin_tx.version == 2)
+                        } // if (mine_output && mixin_tx.version >= 1)
                     }
 
                     // makre only
@@ -2235,11 +2235,7 @@ public:
                             // in key image without spend key, so we just use all
                             // for regular/old txs there must be also a match
                             // in amounts, not only in output public keys
-                            if (mixin_tx.version < 2 && amount == in_key.amount)
-                            {
-                                sum_mixin_xmr += amount;
-                            }
-                            else if (mixin_tx.version == 2) // ringct
+                            if (mixin_tx.version >= 1) // ringct
                             {
                                 sum_mixin_xmr += amount;
                             }
@@ -3511,7 +3507,7 @@ public:
 
             uint64_t xmr_amount = td.amount();
 
-            // if the output is RingCT, i.e., tx version is 2
+            // if mine output has RingCT, i.e., tx version is >= 1 (always true for BLUR)
             // need to decode its amount
             if (td.is_rct())
             {
@@ -4930,8 +4926,8 @@ public:
                 with_additional = true;
             }
 
-            // if mine output has RingCT, i.e., tx version is 2
-            if (mine_output && tx.version == 2)
+            // if mine output has RingCT, i.e., tx version is >= 1 (always true for BLUR)
+            if (mine_output && tx.version >= 1)
             {
                 // cointbase txs have amounts in plain sight.
                 // so use amount from ringct, only for non-coinbase txs
@@ -4959,7 +4955,7 @@ public:
 
                 } // if (!is_coinbase(tx))
 
-            }  // if (mine_output && tx.version == 2)
+            }  // if (mine_output && tx.version >= 1)
 
             j_outptus.push_back(json {
                     {"output_pubkey", pod_to_hex(outp.first.key)},
@@ -5391,8 +5387,8 @@ private:
                     with_additional = true;
                 }
 
-                // if mine output has RingCT, i.e., tx version is 2
-                if (mine_output && tx.version == 2)
+                // if mine output has RingCT, i.e., tx version is >= 1 (always true for BLUR)
+                if (mine_output && tx.version >= 1)
                 {
                     // cointbase txs have amounts in plain sight.
                     // so use amount from ringct, only for non-coinbase txs
@@ -5424,7 +5420,7 @@ private:
 
                     } // if (!is_coinbase(tx))
 
-                }  // if (mine_output && tx.version == 2)
+                }  // if (mine_output && tx.version >= 1)
 
                 if (mine_output)
                 {
@@ -5638,7 +5634,7 @@ private:
                 {"with_ring_signatures"  , static_cast<bool>(
                                                    with_ring_signatures)},
                 {"tx_json"               , tx_json},
-                {"is_ringct"             , (tx.version > 1)},
+                {"is_ringct"             , (tx.version >= 1)},
                 {"rct_type"              , tx.rct_signatures.type},
                 {"has_error"             , false},
                 {"error_msg"             , string("")},

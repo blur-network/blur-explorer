@@ -64,7 +64,7 @@ var cnUtil = (function(initConfig) {
     }
 
     var UINT64_MAX = new JSBigInt(2).pow(64);
-    var CURRENT_TX_VERSION = 2;
+    var CURRENT_TX_VERSION = 1;
     var OLD_TX_VERSION = 1;
     var RCTTypeFull = 1;
     var RCTTypeSimple = 2;
