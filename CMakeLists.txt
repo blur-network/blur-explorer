@@ -60,11 +60,6 @@ if(APPLE)
 endif()
 
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR WIN32)
-    add_library(unbound STATIC IMPORTED)
-    set_property(TARGET unbound PROPERTY IMPORTED_LOCATION ${MONERO_BUILD_DIR}/external/unbound/libunbound.a)
-endif()
-
 # include boost headers
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories("ext/mstch/include")
@@ -110,7 +105,6 @@ set(LIBRARIES
         ringct
         ringct_basic
         device
-        version
         common
         mnemonics
         easylogging
@@ -118,16 +112,15 @@ set(LIBRARIES
         epee
         ${Boost_LIBRARIES}
         pthread
-        unbound
         sodium
         curl
         crypto
         ssl)
 
 if(APPLE)
-    set(LIBRARIES ${LIBRARIES} "-framework IOKit -framework PCSC")
+    set(LIBRARIES ${LIBRARIES} "-framework IOKit")
 else()
-    set(LIBRARIES ${LIBRARIES} atomic pcsclite)
+    set(LIBRARIES ${LIBRARIES} atomic)
 endif()
 
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT WIN32)
