@@ -1956,7 +1956,7 @@ public:
                             in_key.key_offsets);
 
             // get public keys of outputs used in the mixins that match to the offests
-            std::vector<cryptonote::output_data_t> mixin_outputs;
+            std::vector<output_data_t> mixin_outputs;
 
 
             try
@@ -2013,7 +2013,7 @@ public:
             {
 
                 // get basic information about mixn's output
-                cryptonote::output_data_t output_data = mixin_outputs.at(count);
+                output_data_t output_data = mixin_outputs.at(count);
 
                 tx_out_index tx_out_idx;
 
@@ -5702,7 +5702,7 @@ private:
                             in_key.key_offsets);
 
             // get public keys of outputs used in the mixins that match to the offests
-            std::vector<cryptonote::output_data_t> outputs;
+            std::vector<output_data_t> outputs;
 
             try
             {
@@ -5776,7 +5776,7 @@ private:
             for (const uint64_t& i: absolute_offsets)
             {
                 // get basic information about mixn's output
-                cryptonote::output_data_t output_data = outputs.at(count);
+                output_data_t output_data = outputs.at(count);
 
                 tx_out_index tx_out_idx;
 

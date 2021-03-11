@@ -103,7 +103,6 @@ set(LIBRARIES
         cncrypto
         lmdb
         ringct
-        ringct_basic
         device
         common
         mnemonics

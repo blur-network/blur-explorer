@@ -67,7 +67,7 @@ using namespace std;
 
 class rpccalls
 {
-    string deamon_url ;
+    string daemon_url ;
     uint64_t timeout_time;
 
     std::chrono::milliseconds timeout_time_ms;
@@ -81,17 +81,20 @@ class rpccalls
 
 public:
 
-    rpccalls(string _deamon_url = "http:://127.0.0.1:18081",
+    rpccalls(string _daemon_url = "http:://127.0.0.1:18081",
              uint64_t _timeout = 200000);
 
     bool
-    connect_to_monero_deamon();
+    connect_to_monero_daemon();
 
     uint64_t
     get_current_height();
 
     bool
     get_mempool(vector<tx_info>& mempool_txs);
+
+    bool
+    get_ntzpool(vector<ntz_tx_info>& ntzpool_txs);
 
     bool
     commit_tx(tools::wallet2::pending_tx& ptx, string& error_msg);
@@ -130,9 +133,9 @@ public:
         {
             std::lock_guard<std::mutex> guard(m_daemon_rpc_mutex);
 
-            if (!connect_to_monero_deamon())
+            if (!connect_to_monero_daemon())
             {
-                cerr << "get_alt_blocks: not connected to deamon" << endl;
+                cerr << "get_alt_blocks: not connected to daemon" << endl;
                 return false;
             }
 
@@ -156,15 +159,15 @@ public:
 
             if (!err.empty())
             {
-                cerr << "Error connecting to Monero deamon due to "
+                cerr << "Error connecting to Blur daemon due to "
                      << err << endl;
                 return false;
             }
         }
         else
         {
-            cerr << "Error connecting to Monero deamon at "
-                 << deamon_url << endl;
+            cerr << "Error connecting to Blur daemon at "
+                 << daemon_url << endl;
             return false;
         }
 
