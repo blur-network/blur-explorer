@@ -297,13 +297,13 @@ CurrentBlockchainStatus::is_thread_running()
    return is_running;
 }
 
-bf::path CurrentBlockchainStatus::blockchain_path {"${HOME}/.blur-net/lmdb"};
+bf::path CurrentBlockchainStatus::blockchain_path {"${HOME}/.blurnetwork/testnet/lmdb"};
 
-cryptonote::network_type CurrentBlockchainStatus::nettype {cryptonote::network_type::MAINNET};
+cryptonote::network_type CurrentBlockchainStatus::nettype {cryptonote::network_type::TESTNET};
 
 string CurrentBlockchainStatus::output_file {"emission_amount.txt"};
 
-string CurrentBlockchainStatus::deamon_url {"http:://127.0.0.1:13895"};
+string CurrentBlockchainStatus::deamon_url {"http:://127.0.0.1:21111"};
 
 uint64_t  CurrentBlockchainStatus::blockchain_chunk_size {10000};
 

@@ -180,7 +180,7 @@ timestamp_to_str_gm(time_t timestamp, const char* format)
 ostream&
 operator<< (ostream& os, const address_parse_info& addr_info)
 {
-    os << get_account_address_as_str(network_type::MAINNET, addr_info.is_subaddress, addr_info.address);
+    os << get_account_address_as_str(network_type::TESTNET, addr_info.is_subaddress, addr_info.address);
     return os;
 }
 

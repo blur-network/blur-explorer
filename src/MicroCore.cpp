@@ -11,7 +11,7 @@ namespace
     // NOTE: These values should match blockchain.cpp
     // TODO: Refactor
     const uint64_t mainnet_hard_fork_version_1_till = 1009826;
-    const uint64_t testnet_hard_fork_version_1_till = 624633;
+    const uint64_t testnet_hard_fork_version_1_till = 1;
 }
 
 
@@ -64,7 +64,7 @@ MicroCore::init(const string& _blockchain_path)
     BlockchainDB* db = nullptr;
     db = new BlockchainLMDB();
 
-    bool use_testnet {false};
+    bool use_testnet {true};
 
     uint64_t hard_fork_version_1_till = use_testnet ? testnet_hard_fork_version_1_till : mainnet_hard_fork_version_1_till;
 
@@ -90,7 +90,7 @@ MicroCore::init(const string& _blockchain_path)
 
     // initialize Blockchain object to manage
     // the database.
-    return m_blockchain_storage.init(db, m_hardfork, network_type::MAINNET);
+    return m_blockchain_storage.init(db, m_hardfork, network_type::TESTNET);
 }
 
 /**

@@ -1,5 +1,5 @@
 <h2 style="margin-bottom: 0px">
-   Transaction pool
+   Transaction Pool
 </h2>
 <h4 style="font-size: 12px; margin-top: 0px">(no of txs: {{mempool_size}}, size: {{mempool_size_kB}} kB, updated every {{ mempool_refresh_time }} seconds)</h4>
 <div class="center">
@@ -35,6 +35,44 @@
       {{/partial_mempool_shown}}
 
     {{/mempool_fits_on_front_page}}
+</div>
 
 
+<h2 style="margin-bottom: 0px">
+   Pending Notarization Pool
+</h2>
+<h4 style="font-size: 12px; margin-top: 0px">(no of txs: {{ntzpool_size}}, size: {{ntzpool_size_kB}} kB, updated every {{ mempool_refresh_time }} seconds)</h4>
+<div class="center">
+    
+      <table class="center" style="width:80%">
+            <tr>
+                <td>age [h:m:s]</td>
+                <td>transaction hash</td>
+                <td>fee/per_kB</td>
+                <!--<td>outputs</td>-->
+                <td>in/out/pID</td>
+                <td>ring size</td>
+                <td>tx size [kB]</td>
+            </tr>
+            {{#ntzpooltxs}}
+            <tr>
+                <td>{{age}}</td>
+                <td><a href="/tx/{{hash}}">{{hash}}</a></td>
+                <td>{{fee}}/{{payed_for_kB}}</td>
+                <!--<td>{{xmr_outputs}}</td>-->
+                <td>{{no_inputs}}/{{no_outputs}}/{{pID}}</td>
+                <td>{{mixin}}</td>
+                <td>{{txsize}}</td>
+            </tr>
+            {{/ntzpooltxs}}
+        </table>
+
+    {{^ntzpool_fits_on_front_page}}
+      {{#partial_ntzpool_shown}}
+      <div class="center" style="text-align: center; margin-bottom: 10px">
+          <a href="/ntzpool">Only {{no_of_ntzpool_tx_of_frontpage}} txs shown. Click here to see all of them</a>
+      </div>
+      {{/partial_ntzpool_shown}}
+
+    {{/ntzpool_fits_on_front_page}}
 </div>

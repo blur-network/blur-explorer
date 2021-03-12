@@ -306,6 +306,7 @@ class page
 
 
     uint64_t no_of_mempool_tx_of_frontpage;
+    uint64_t no_of_ntzpool_tx_of_frontpage;
     uint64_t no_blocks_on_index;
     uint64_t mempool_info_timeout;
 
@@ -389,6 +390,7 @@ public:
 
 
         no_of_mempool_tx_of_frontpage = 25;
+        no_of_ntzpool_tx_of_frontpage = 25;
 
         // read template files for all the pages
         // into template_file map
@@ -507,6 +509,13 @@ public:
         {
             // get memory pool rendered template
             return mempool(false, no_of_mempool_tx_of_frontpage);
+        });
+
+        // get mempool for the front page also using async future
+        std::future<string> ntzpool_ftr = std::async(std::launch::async, [&]
+        {
+            // get memory pool rendered template
+            return ntzpool(false, no_of_ntzpool_tx_of_frontpage);
         });
 
         //get current server timestamp
@@ -912,7 +921,7 @@ public:
 
         if (add_header_and_footer)
         {
-            // get all memmpool txs
+            // get all mempool txs
             mempool_txs = MempoolStatus::get_mempool_txs();
             no_of_mempool_tx = mempool_txs.size();
         }
@@ -928,8 +937,6 @@ public:
 
         // reasign this number, in case no of txs in mempool is smaller
         // than what we requested or we want all txs.
-
-
         uint64_t total_no_of_mempool_tx = MempoolStatus::mempool_no;
 
         // initalise page tempate map with basic info about mempool
@@ -970,7 +977,7 @@ public:
                                          delta_hours,
                                          delta_time[3], delta_time[4]);
 
-            // if more than 99 hourse, change formating
+            // if more than 99 hours, change formating
             // for the template
             if (delta_hours > 99)
             {
@@ -1026,6 +1033,127 @@ public:
         return mstch::render(template_file["mempool"], context);
     }
 
+
+    /**
+     * Render ntzpool data
+     */
+    string
+    ntzpool(bool add_header_and_footer = false, uint64_t no_of_ntzpool_tx = 25)
+    {
+        std::vector<MempoolStatus::ntzpool_tx> ntzpool_txs;
+
+        if (add_header_and_footer)
+        {
+            // get all ntzpool txs
+            ntzpool_txs = MempoolStatus::get_ntzpool_txs();
+            no_of_ntzpool_tx = ntzpool_txs.size();
+        }
+        else
+        {
+            ntzpool_txs = MempoolStatus::get_ntzpool_txs(no_of_ntzpool_tx);
+            no_of_ntzpool_tx = std::min<uint64_t>(no_of_ntzpool_tx, ntzpool_txs.size());
+        }
+
+        // total size of mempool in bytes
+        uint64_t ntzpool_size_bytes = MempoolStatus::ntzpool_size;
+
+        // reasign this number, in case no of txs in mempool is smaller
+        // than what we requested or we want all txs.
+        uint64_t total_no_of_ntzpool_tx = MempoolStatus::ntzpool_no;
+
+        // initalise page tempate map with basic info about mempool
+        mstch::map context {
+                {"ntzpool_size"          , static_cast<uint64_t>(total_no_of_ntzpool_tx)}, // total no of ntzpool txs
+                {"show_cache_times"      , show_cache_times},
+                {"mempool_refresh_time"  , MempoolStatus::mempool_refresh_time}
+        };
+
+        context.emplace("ntzpooltxs" , mstch::array());
+
+        // get reference to blocks template map to be field below
+        mstch::array& ntz_txs = boost::get<mstch::array>(context["ntzpooltxs"]);
+
+        double duration_cached     {0.0};
+        double duration_non_cached {0.0};
+        uint64_t cache_hits   {0};
+        uint64_t cache_misses {0};
+
+        uint64_t local_copy_server_timestamp = server_timestamp;
+
+        // for each transaction in the ntz pool
+        for (size_t i = 0; i < no_of_ntzpool_tx; ++i)
+        {
+            // get transaction info of the tx in the mempool
+            const MempoolStatus::ntzpool_tx& ntzpool_tx = ntzpool_txs.at(i);
+
+            // calculate difference between tx in mempool and server timestamps
+            array<size_t, 5> delta_time = timestamp_difference(
+                    local_copy_server_timestamp,
+                    ntzpool_tx.receive_time);
+
+            // use only hours, so if we have days, add
+            // it to hours
+            uint64_t delta_hours {delta_time[1]*24 + delta_time[2]};
+
+            string age_str = fmt::format("{:02d}:{:02d}:{:02d}",
+                                         delta_hours,
+                                         delta_time[3], delta_time[4]);
+
+            // if more than 99 hours, change formating
+            // for the template
+            if (delta_hours > 99)
+            {
+                age_str = fmt::format("{:03d}:{:02d}:{:02d}",
+                                      delta_hours,
+                                      delta_time[3], delta_time[4]);
+            }
+
+            // cout << "block_tx_json_cache from cache" << endl;
+
+            // set output page template map
+            ntz_txs.push_back(mstch::map {
+                    {"timestamp_no"    , ntzpool_tx.receive_time},
+                    {"timestamp"       , ntzpool_tx.timestamp_str},
+                    {"age"             , age_str},
+                    {"hash"            , pod_to_hex(ntzpool_tx.tx_hash)},
+                    {"fee"             , ntzpool_tx.fee_str},
+                    {"payed_for_kB"    , ntzpool_tx.payed_for_kB_str},
+                    {"xmr_inputs"      , ntzpool_tx.xmr_inputs_str},
+                    {"xmr_outputs"     , ntzpool_tx.xmr_outputs_str},
+                    {"no_inputs"       , ntzpool_tx.no_inputs},
+                    {"no_outputs"      , ntzpool_tx.no_outputs},
+                    {"pID"             , string {ntzpool_tx.pID}},
+                    {"no_nonrct_inputs", ntzpool_tx.num_nonrct_inputs},
+                    {"mixin"           , ntzpool_tx.mixin_no},
+                    {"txsize"          , ntzpool_tx.txsize}
+            });
+        }
+
+        context.insert({"ntzpool_size_kB",
+                        fmt::format("{:0.2f}",
+                                    static_cast<double>(ntzpool_size_bytes)/1024.0)});
+
+        if (add_header_and_footer)
+        {
+            // this is when mempool is on its own page, /mempool
+            add_css_style(context);
+
+            context["partial_ntzpool_shown"] = false;
+
+            // render the page
+            return mstch::render(template_file["ntzpool_full"], context);
+        }
+
+        // this is for partial disply on front page.
+
+        context["ntzpool_fits_on_front_page"]    = (total_no_of_ntzpool_tx <= ntzpool_txs.size());
+        context["no_of_ntzpool_tx_of_frontpage"] = no_of_ntzpool_tx;
+
+        context["partial_ntzpool_shown"] = true;
+
+        // render the page
+        return mstch::render(template_file["ntzpool"], context);
+    }
 
     string
     altblocks()
@@ -1339,6 +1467,7 @@ public:
                  << ". \n Check mempool now" << endl;
 
             vector<MempoolStatus::mempool_tx> found_txs;
+            vector<MempoolStatus::ntzpool_tx> found_ntz_txs;
 
             search_mempool(tx_hash, found_txs);
 
@@ -1364,8 +1493,32 @@ public:
             }
             else
             {
-                // tx is nowhere to be found :-(
-                return string("Cant get tx: " + tx_hash_str);
+                search_ntzpool(tx_hash, found_ntz_txs);
+                if (!found_ntz_txs.empty())
+                {
+                    // there should be only one tx found
+                    tx = found_ntz_txs.at(0).tx;
+
+                    // since its tx in ntzpool, it has no blk yet
+                    // so use its recive_time as timestamp to show
+
+                    uint64_t tx_recieve_timestamp
+                          = found_ntz_txs.at(0).receive_time;
+
+                    blk_timestamp = xmreg::timestamp_to_str_gm(tx_recieve_timestamp);
+
+                    age = get_age(server_timestamp, tx_recieve_timestamp,
+                                FULL_AGE_FORMAT);
+
+                    // for mempool tx, we dont show more details, e.g., json tx representation
+                    // so no need for the link
+                    // show_more_details_link = false;
+                }
+                else
+                {
+                  // tx is nowhere to be found :-(
+                  return string("Cant get tx: " + tx_hash_str);
+                }
             }
         }
 
@@ -3102,12 +3255,25 @@ public:
 
             // check in mempool already contains tx to be submited
             vector<MempoolStatus::mempool_tx> found_mempool_txs;
+            vector<MempoolStatus::ntzpool_tx> found_ntzpool_txs;
 
             search_mempool(txd.hash, found_mempool_txs);
+            search_ntzpool(txd.hash, found_ntzpool_txs);
 
             if (!found_mempool_txs.empty())
             {
                 string error_msg = fmt::format("Tx already exist in the mempool: {:s}\n",
+                                               tx_hash_str);
+
+                context["has_error"] = true;
+                context["error_msg"] = error_msg;
+
+                break;
+            }
+
+            if (!found_ntzpool_txs.empty())
+            {
+                string error_msg = fmt::format("Tx already exist in the ntzpool: {:s}\n",
                                                tx_hash_str);
 
                 context["has_error"] = true;
@@ -3676,7 +3842,7 @@ public:
             // parse string representing given monero address
             address_parse_info address_info;
 
-            cryptonote::network_type nettype_addr {cryptonote::network_type::MAINNET};
+            cryptonote::network_type nettype_addr {cryptonote::network_type::TESTNET};
 
             if (search_text[0] == '9' || search_text[0] == 'A' || search_text[0] == 'B')
                 nettype_addr = cryptonote::network_type::TESTNET;
@@ -3725,7 +3891,7 @@ public:
     }
 
     string
-    show_address_details(const address_parse_info& address_info, cryptonote::network_type nettype = cryptonote::network_type::MAINNET)
+    show_address_details(const address_parse_info& address_info, cryptonote::network_type nettype = cryptonote::network_type::TESTNET)
     {
 
         string address_str      = xmreg::print_address(address_info, nettype);
@@ -3751,7 +3917,7 @@ public:
     string
     show_integrated_address_details(const address_parse_info& address_info,
                                     const crypto::hash8& encrypted_payment_id,
-                                    cryptonote::network_type nettype = cryptonote::network_type::MAINNET)
+                                    cryptonote::network_type nettype = cryptonote::network_type::TESTNET)
     {
 
         string address_str        = xmreg::print_address(address_info, nettype);
@@ -3912,8 +4078,10 @@ public:
                         // check in mempool if tx_hash not found in the
                         // blockchain
                         vector<MempoolStatus::mempool_tx> found_txs;
+                        vector<MempoolStatus::ntzpool_tx> found_ntz_txs;
 
                         search_mempool(tx_hash_pod, found_txs);
+                        search_ntzpool(tx_hash_pod, found_ntz_txs);
 
                         if (!found_txs.empty())
                         {
@@ -3922,7 +4090,15 @@ public:
                         }
                         else
                         {
-                            return string("Cant get tx of hash (show_search_results): " + tx_hash);
+                            if (!found_txs.empty())
+                            {
+                                // there should be only one tx found
+                                tx = found_ntz_txs.at(0).tx;
+                            }
+                            else
+                            {
+                                return string("Cant get tx of hash (show_search_results): " + tx_hash);
+                            }
                         }
 
                         // tx in mempool have no blk_timestamp
@@ -4010,11 +4186,14 @@ public:
         // flag to indicate if tx is in mempool
         bool found_in_mempool {false};
 
+        // flag to indicate if tx is in ntzpool
+        bool found_in_ntzpool {false};
+
         // for tx in blocks we get block timestamp
         // for tx in mempool we get recievive time
         uint64_t tx_timestamp {0};
 
-        if (!find_tx(tx_hash, tx, found_in_mempool, tx_timestamp))
+        if (!find_tx(tx_hash, tx, found_in_mempool, found_in_ntzpool, tx_timestamp))
         {
             j_data["title"] = fmt::format("Cant find tx hash: {:s}", tx_hash_str);
             return j_response;
@@ -4024,7 +4203,7 @@ public:
         uint64_t is_coinbase_tx = is_coinbase(tx);
         uint64_t no_confirmations {0};
 
-        if (found_in_mempool == false)
+        if ((found_in_mempool == false) && (found_in_ntzpool == false))
         {
 
             block blk;
@@ -4117,7 +4296,7 @@ public:
             }
         }
 
-        if (found_in_mempool == false)
+        if ((found_in_mempool == false) && (found_in_ntzpool == false))
         {
             no_confirmations = txd.no_confirmations;
         }
@@ -4175,18 +4354,20 @@ public:
 
         // flag to indicate if tx is in mempool
         bool found_in_mempool {false};
+        // flag to indicate if tx is in ntzpool
+        bool found_in_ntzpool {false};
 
         // for tx in blocks we get block timestamp
         // for tx in mempool we get recievive time
         uint64_t tx_timestamp {0};
 
-        if (!find_tx(tx_hash, tx, found_in_mempool, tx_timestamp))
+        if (!find_tx(tx_hash, tx, found_in_mempool, found_in_ntzpool, tx_timestamp))
         {
             j_data["title"] = fmt::format("Cant find tx hash: {:s}", tx_hash_str);
             return j_response;
         }
 
-        if (found_in_mempool == false)
+        if ((found_in_mempool == false) && (found_in_ntzpool == false))
         {
 
             block blk;
@@ -4853,11 +5034,14 @@ public:
         // flag to indicate if tx is in mempool
         bool found_in_mempool {false};
 
+        // flag to indicate if tx is in mempool
+        bool found_in_ntzpool {false};
+
         // for tx in blocks we get block timestamp
         // for tx in mempool we get recievive time
         uint64_t tx_timestamp {0};
 
-        if (!find_tx(tx_hash, tx, found_in_mempool, tx_timestamp))
+        if (!find_tx(tx_hash, tx, found_in_mempool, found_in_ntzpool, tx_timestamp))
         {
             j_data["title"] = fmt::format("Cant find tx hash: {:s}", tx_hash_str);
             return j_response;
@@ -4865,6 +5049,7 @@ public:
 
         (void) tx_timestamp;
         (void) found_in_mempool;
+        (void) found_in_ntzpool;
 
         tx_details txd = get_tx_details(tx);
 
@@ -5474,10 +5659,12 @@ private:
     find_tx(const crypto::hash& tx_hash,
             transaction& tx,
             bool& found_in_mempool,
+            bool& found_in_ntzpool,
             uint64_t& tx_timestamp)
     {
 
         found_in_mempool = false;
+        found_in_ntzpool = false;
 
         if (!mcore->get_tx(tx_hash, tx))
         {
@@ -5485,8 +5672,10 @@ private:
                  << ". \n Check mempool now" << endl;
 
             vector<MempoolStatus::mempool_tx> found_txs;
+            vector<MempoolStatus::ntzpool_tx> found_ntz_txs;
 
             search_mempool(tx_hash, found_txs);
+            search_ntzpool(tx_hash, found_ntz_txs);
 
             if (!found_txs.empty())
             {
@@ -5497,8 +5686,18 @@ private:
             }
             else
             {
-                // tx is nowhere to be found :-(
-                return false;
+                if (!found_ntz_txs.empty())
+                {
+                   // there should be only one tx found
+                   tx = found_ntz_txs.at(0).tx;
+                   found_in_ntzpool = true;
+                   tx_timestamp = found_ntz_txs.at(0).receive_time;
+                }
+                else
+                {
+                    // tx is nowhere to be found :-(
+                    return false;
+                }
             }
         }
 
@@ -6187,6 +6386,39 @@ private:
             }
 
         } // for (size_t i = 0; i < mempool_txs.size(); ++i)
+
+        return true;
+    }
+
+    bool
+    search_ntzpool(crypto::hash tx_hash,
+                   vector<MempoolStatus::ntzpool_tx>& found_ntz_txs)
+    {
+        // if tx_hash == null_hash then this method
+        // will just return the vector containing all
+        // txs in ntzpool
+
+        // get ntzpool tx from mempoolstatus thread
+        vector<MempoolStatus::ntzpool_tx> ntzpool_txs
+                = MempoolStatus::get_ntzpool_txs();
+
+        // if dont have tx_blob member, construct tx
+        // from json obtained from the rpc call
+
+        for (size_t i = 0; i < ntzpool_txs.size(); ++i)
+        {
+            // get transaction info of the tx in the mempool
+            const MempoolStatus::ntzpool_tx& ntzpool_tx = ntzpool_txs.at(i);
+
+            if (tx_hash == ntzpool_tx.tx_hash || tx_hash == null_hash)
+            {
+                found_ntz_txs.push_back(ntzpool_tx);
+
+                if (tx_hash != null_hash)
+                    break;
+            }
+
+        } // for (size_t i = 0; i < ntzpool_txs.size(); ++i)
 
         return true;
     }
