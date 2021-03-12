@@ -39,8 +39,10 @@
 #define TMPL_INDEX2                 TMPL_DIR "/index2.html"
 #define TMPL_SUPPLY                 TMPL_DIR "/supply.html"
 #define TMPL_MEMPOOL                TMPL_DIR "/mempool.html"
+#define TMPL_NTZPOOL                TMPL_DIR "/ntzpool.html"
 #define TMPL_ALTBLOCKS              TMPL_DIR "/altblocks.html"
 #define TMPL_MEMPOOL_ERROR          TMPL_DIR "/mempool_error.html"
+#define TMPL_NTZPOOL_ERROR          TMPL_DIR "/ntzpool_error.html"
 #define TMPL_HEADER                 TMPL_DIR "/header.html"
 #define TMPL_FOOTER                 TMPL_DIR "/footer.html"
 #define TMPL_BLOCK                  TMPL_DIR "/block.html"
@@ -401,9 +403,12 @@ public:
         template_file["index2"]          = get_full_page(xmreg::read(TMPL_INDEX2));
         template_file["supply"]          = get_full_page(xmreg::read(TMPL_SUPPLY));
         template_file["mempool"]         = xmreg::read(TMPL_MEMPOOL);
+        template_file["ntzpool"]         = xmreg::read(TMPL_NTZPOOL);
         template_file["altblocks"]       = get_full_page(xmreg::read(TMPL_ALTBLOCKS));
         template_file["mempool_error"]   = xmreg::read(TMPL_MEMPOOL_ERROR);
+        template_file["ntzpool_error"]   = xmreg::read(TMPL_NTZPOOL_ERROR);
         template_file["mempool_full"]    = get_full_page(template_file["mempool"]);
+        template_file["ntzpool_full"]    = get_full_page(template_file["ntzpool"]);
         template_file["block"]           = get_full_page(xmreg::read(TMPL_BLOCK));
         template_file["tx"]              = get_full_page(xmreg::read(TMPL_TX));
         template_file["my_outputs"]      = get_full_page(xmreg::read(TMPL_MY_OUTPUTS));
@@ -863,9 +868,13 @@ public:
         context["blk_size_median"] = string {current_network_info.block_size_median_str};
 
         string mempool_html {"Cant get mempool_pool"};
+        string ntzpool_html {"Cant get ntzpool_pool"};
 
         // get mempool data for the front page, if ready. If not, then just skip.
         std::future_status mempool_ftr_status = mempool_ftr.wait_for(
+                std::chrono::milliseconds(mempool_info_timeout));
+
+        std::future_status ntzpool_ftr_status = ntzpool_ftr.wait_for(
                 std::chrono::milliseconds(mempool_info_timeout));
 
         if (mempool_ftr_status == std::future_status::ready)
@@ -876,6 +885,16 @@ public:
         {
             cerr  << "mempool future not ready yet, skipping." << endl;
             mempool_html = mstch::render(template_file["mempool_error"], context);
+        }
+
+        if (ntzpool_ftr_status == std::future_status::ready)
+        {
+            ntzpool_html = ntzpool_ftr.get();
+        }
+        else
+        {
+            cerr  << "ntzpool future not ready yet, skipping." << endl;
+            ntzpool_html = mstch::render(template_file["ntzpool_error"], context);
         }
 
         if (CurrentBlockchainStatus::is_thread_running())
@@ -904,6 +923,7 @@ public:
 
         // append mempool_html to the index context map
         context["mempool_info"] = mempool_html;
+        context["ntzpool_info"] = ntzpool_html;
 
         add_css_style(context);
 
@@ -5168,6 +5188,7 @@ public:
 
 
 
+    //TODO: Add ntzpool to json_outputsblocks?
     json
     json_outputsblocks(string _limit,
                        string address_str,

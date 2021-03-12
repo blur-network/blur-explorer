@@ -69,6 +69,12 @@ MempoolStatus::start_mempool_status_thread()
                  cout << "mempool status txs: "
                       << current_mempool_txs.size()
                       << endl;
+
+                 vector<ntzpool_tx> current_ntzpool_txs = get_ntzpool_txs();
+
+                 cout << "ntzpool status txs: "
+                      << current_ntzpool_txs.size()
+                      << endl;
              }
 
              // when we reach top of the blockchain, update

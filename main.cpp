@@ -508,6 +508,11 @@ main(int ac, const char* av[])
         return xmrblocks.mempool(true);
     });
 
+    CROW_ROUTE(app, "/ntzpool")
+    ([&](const crow::request& req) {
+        return xmrblocks.ntzpool(true);
+    });
+
     // alias to  "/mempool"
     CROW_ROUTE(app, "/txpool")
     ([&](const crow::request& req) {
