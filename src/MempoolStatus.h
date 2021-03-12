@@ -49,6 +49,31 @@ struct MempoolStatus
                       // 'e' - encrypted, short, from integrated addresses
     };
 
+    struct ntzpool_tx
+    {
+        crypto::hash tx_hash;
+        transaction tx;
+
+        uint64_t receive_time {0};
+        uint64_t sum_inputs {0};
+        uint64_t sum_outputs {0};
+        uint64_t no_inputs {0};
+        uint64_t no_outputs {0};
+        uint64_t num_nonrct_inputs {0};
+        uint64_t mixin_no {0};
+
+        string fee_str;
+        string payed_for_kB_str;
+        string xmr_inputs_str;
+        string xmr_outputs_str;
+        string timestamp_str;
+        string txsize;
+
+        char     pID; // '-' - no payment ID,
+                      // 'l' - legacy, long 64 character payment id,
+                      // 'e' - encrypted, short, from integrated addresses
+    };
+
 
     // to keep network_info in cache
     // and to show previous info in case current querry for
@@ -121,6 +146,9 @@ struct MempoolStatus
     static atomic<uint64_t> mempool_no;   // no of txs
     static atomic<uint64_t> mempool_size; // size in bytes.
 
+    static atomic<uint64_t> ntzpool_no;   // no of txs
+    static atomic<uint64_t> ntzpool_size; // size in bytes.
+
     static bf::path blockchain_path;
     static string deamon_url;
     static cryptonote::network_type nettype;
@@ -133,6 +161,11 @@ struct MempoolStatus
     // can refer to
     //           <recieved_time, transaction>
     static vector<mempool_tx> mempool_txs;
+
+    // vector of ntzpool transactions that all threads
+    // can refer to
+    //           <recieved_time, transaction>
+    static vector<ntzpool_tx> ntzpool_txs;
 
     static atomic<network_info> current_network_info;
 
@@ -155,6 +188,13 @@ struct MempoolStatus
     // get first no_of_tx from the vector
     static vector<mempool_tx>
     get_mempool_txs(uint64_t no_of_tx);
+
+    static vector<ntzpool_tx>
+    get_ntzpool_txs();
+
+    // get first no_of_tx from the vector
+    static vector<ntzpool_tx>
+    get_ntzpool_txs(uint64_t no_of_tx);
 
     static bool
     is_thread_running();

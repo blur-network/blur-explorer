@@ -107,12 +107,22 @@ MempoolStatus::read_mempool()
     // other places.
     vector<mempool_tx> local_copy_of_mempool_txs;
 
+    vector<ntzpool_tx> local_copy_of_ntzpool_txs;
+
     // get txs in the mempool
     std::vector<tx_info> mempool_tx_info;
+    // get txs in ntzpool
+    std::vector<ntz_tx_info> ntzpool_tx_info;
 
     if (!rpc.get_mempool(mempool_tx_info))
     {
         cerr << "Getting mempool failed " << endl;
+        return false;
+    }
+
+    if (!rpc.get_ntzpool(ntzpool_tx_info))
+    {
+        cerr << "Getting ntzpool failed " << endl;
         return false;
     }
 
@@ -198,7 +208,84 @@ MempoolStatus::read_mempool()
 
     } // for (size_t i = 0; i < mempool_tx_info.size(); ++i)
 
+    uint64_t ntzpool_size_kB {0};
 
+    for (size_t i = 0; i < ntzpool_tx_info.size(); ++i)
+    {
+        // get transaction info of the tx in the mempool
+        const ntz_tx_info& _tx_info = ntzpool_tx_info.at(i);
+
+        transaction tx;
+        crypto::hash tx_hash;
+        crypto::hash tx_prefix_hash;
+
+        if (!parse_and_validate_tx_from_blob(
+                _tx_info.tx_blob, tx, tx_hash, tx_prefix_hash))
+        {
+            cerr << "Cant make tx from _tx_info.tx_blob" << endl;
+            return false;
+        }
+
+        ntzpool_size_kB += _tx_info.blob_size;
+
+        local_copy_of_ntzpool_txs.push_back(ntzpool_tx {tx_hash, tx});
+
+        ntzpool_tx& last_tx = local_copy_of_ntzpool_txs.back();
+
+        // key images of inputs
+        vector<txin_to_key> input_key_imgs;
+
+        // public keys and xmr amount of outputs
+        vector<pair<txout_to_key, uint64_t>> output_pub_keys;
+
+        // sum xmr in inputs and ouputs in the given tx
+        const array<uint64_t, 4>& sum_data = summary_of_in_out_rct(
+               tx, output_pub_keys, input_key_imgs);
+
+
+
+        double tx_size =  static_cast<double>(_tx_info.blob_size)/1024.0;
+
+        double payed_for_kB = XMR_AMOUNT(_tx_info.fee) / tx_size;
+
+        last_tx.receive_time = _tx_info.receive_time;
+
+        last_tx.sum_outputs       = sum_data[0];
+        last_tx.sum_inputs        = sum_data[1];
+        last_tx.no_outputs        = output_pub_keys.size();
+        last_tx.no_inputs         = input_key_imgs.size();
+        last_tx.mixin_no          = sum_data[2];
+        last_tx.num_nonrct_inputs = sum_data[3];
+
+        last_tx.fee_str          = xmreg::xmr_amount_to_str(_tx_info.fee, "{:0.3f}", false);
+        last_tx.payed_for_kB_str = fmt::format("{:0.4f}", payed_for_kB);
+        last_tx.xmr_inputs_str   = xmreg::xmr_amount_to_str(last_tx.sum_inputs , "{:0.3f}");
+        last_tx.xmr_outputs_str  = xmreg::xmr_amount_to_str(last_tx.sum_outputs, "{:0.3f}");
+        last_tx.timestamp_str    = xmreg::timestamp_to_str_gm(_tx_info.receive_time);
+
+        last_tx.txsize           = fmt::format("{:0.2f}", tx_size);
+
+        last_tx.pID              = '-';
+
+        crypto::hash payment_id;
+        crypto::hash8 payment_id8;
+
+        get_payment_id(tx, payment_id, payment_id8);
+
+        if (payment_id != null_hash)
+            last_tx.pID = 'l'; // legacy payment id
+        else if (payment_id8 != null_hash8)
+            last_tx.pID = 'e'; // encrypted payment id
+        else if (!get_additional_tx_pub_keys_from_extra(tx).empty())
+        {
+            // if multioutput tx have additional public keys,
+            // mark it so that it represents that it has at least
+            // one sub-address
+            last_tx.pID = 's';
+        }
+       // } // if (hex_to_pod(_tx_info.id_hash, mem_tx_hash))
+
+    } // for (size_t i = 0; i < ntzpool_tx_info.size(); ++i)
 
     Guard lck (mempool_mutx);
 
@@ -210,6 +297,11 @@ MempoolStatus::read_mempool()
     mempool_size = mempool_size_kB;
 
     mempool_txs = std::move(local_copy_of_mempool_txs);
+
+    ntzpool_no   = local_copy_of_ntzpool_txs.size();
+    ntzpool_size = ntzpool_size_kB;
+
+    ntzpool_txs = std::move(local_copy_of_ntzpool_txs);
 
     return true;
 }
@@ -300,6 +392,13 @@ MempoolStatus::get_mempool_txs()
     return mempool_txs;
 }
 
+vector<MempoolStatus::ntzpool_tx>
+MempoolStatus::get_ntzpool_txs()
+{
+    Guard lck (mempool_mutx);
+    return ntzpool_txs;
+}
+
 vector<MempoolStatus::mempool_tx>
 MempoolStatus::get_mempool_txs(uint64_t no_of_tx)
 {
@@ -308,6 +407,16 @@ MempoolStatus::get_mempool_txs(uint64_t no_of_tx)
     no_of_tx = std::min<uint64_t>(no_of_tx, mempool_txs.size());
 
     return vector<mempool_tx>(mempool_txs.begin(), mempool_txs.begin() + no_of_tx);
+}
+
+vector<MempoolStatus::ntzpool_tx>
+MempoolStatus::get_ntzpool_txs(uint64_t no_of_tx)
+{
+    Guard lck (mempool_mutx);
+
+    no_of_tx = std::min<uint64_t>(no_of_tx, ntzpool_txs.size());
+
+    return vector<ntzpool_tx>(ntzpool_txs.begin(), ntzpool_txs.begin() + no_of_tx);
 }
 
 bool
@@ -324,9 +433,12 @@ boost::thread      MempoolStatus::m_thread;
 Blockchain*        MempoolStatus::core_storage {nullptr};
 xmreg::MicroCore*  MempoolStatus::mcore {nullptr};
 vector<MempoolStatus::mempool_tx> MempoolStatus::mempool_txs;
+vector<MempoolStatus::ntzpool_tx> MempoolStatus::ntzpool_txs;
 atomic<MempoolStatus::network_info> MempoolStatus::current_network_info;
 atomic<uint64_t> MempoolStatus::mempool_no {0};   // no of txs
 atomic<uint64_t> MempoolStatus::mempool_size {0}; // size in bytes.
+atomic<uint64_t> MempoolStatus::ntzpool_no {0};   // no of txs
+atomic<uint64_t> MempoolStatus::ntzpool_size {0}; // size in bytes.
 uint64_t MempoolStatus::mempool_refresh_time {10};
 mutex MempoolStatus::mempool_mutx;
 }
