@@ -24,7 +24,12 @@ set(SRC
     token.cpp
     utils.cpp)
 
-add_library(mstch STATIC ${SRC})
+if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  add_library(mstch ${SRC})
+else()
+  add_library(mstch STATIC ${SRC})
+endif()
+
 #
 set_property(TARGET mstch PROPERTY VERSION ${mstch_VERSION})
 #

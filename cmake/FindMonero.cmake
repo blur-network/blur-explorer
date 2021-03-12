@@ -28,16 +28,43 @@
 # (c) 2014-2016 cpp-ethereum contributors.
 #------------------------------------------------------------------------------
 
-set(LIBS common;blocks;cryptonote_basic;cryptonote_core;multisig;
+set(LIBS common;cryptonote_basic;cryptonote_core;multisig;
 		cryptonote_protocol;daemonizer;mnemonics;epee;lmdb;device;
-		blockchain_db;ringct;wallet;cncrypto;easylogging;version;checkpoints)
+		blockchain_db;ringct;wallet;cncrypto;easylogging;checkpoints)
 
 set(Xmr_INCLUDE_DIRS "${CPP_MONERO_DIR}")
 
 # if the project is a subset of main cpp-ethereum project
 # use same pattern for variables as Boost uses
 
-foreach (l ${LIBS})
+if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  foreach (l ${LIBS})
+
+	string(TOUPPER ${l} L)
+
+	find_library(Xmr_${L}_LIBRARY
+		NAMES ${l}
+		PATHS ${CMAKE_LIBRARY_PATH}
+		PATH_SUFFIXES "/src/${l}" "/src/" "/external/db_drivers/lib${l}" "/lib" "/src/crypto" "/contrib/epee/src" "/external/easylogging++/"
+		NO_DEFAULT_PATH
+	)
+
+	set(Xmr_${L}_LIBRARIES ${Xmr_${L}_LIBRARY})
+
+	message(STATUS FindMonero " Xmr_${L}_LIBRARIES ${Xmr_${L}_LIBRARY}")
+
+	add_library(${l} SHARED IMPORTED)
+	set_property(TARGET ${l} PROPERTY IMPORTED_LOCATION ${Xmr_${L}_LIBRARIES})
+
+  endforeach()
+  if (EXISTS ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.so)
+	message(STATUS FindMonero " found libringct_basic.so")
+	add_library(ringct_basic SHARED IMPORTED)
+	set_property(TARGET ringct_basic
+			PROPERTY IMPORTED_LOCATION ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.so)
+  endif()
+else()
+  foreach (l ${LIBS})
 
 	string(TOUPPER ${l} L)
 
@@ -55,15 +82,14 @@ foreach (l ${LIBS})
 	add_library(${l} STATIC IMPORTED)
 	set_property(TARGET ${l} PROPERTY IMPORTED_LOCATION ${Xmr_${L}_LIBRARIES})
 
-endforeach()
-
-if (EXISTS ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.a)
+  endforeach()
+  if (EXISTS ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.a)
 	message(STATUS FindMonero " found libringct_basic.a")
 	add_library(ringct_basic STATIC IMPORTED)
 	set_property(TARGET ringct_basic
 			PROPERTY IMPORTED_LOCATION ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.a)
+  endif()
 endif()
-
 
 message(STATUS ${MONERO_SOURCE_DIR}/build)
 

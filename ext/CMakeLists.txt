@@ -16,8 +16,11 @@ set(SOURCE_FILES
 # make static library called libmyxrm
 # that we are going to link to
 # in the root CMakeLists.txt file
-add_library(myext
-        STATIC
-        ${SOURCE_FILES})
-
-
+if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  add_library(myext
+          ${SOURCE_FILES})
+else()
+  add_library(myext
+          STATIC
+          ${SOURCE_FILES})
+endif()
