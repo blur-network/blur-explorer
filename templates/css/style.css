@@ -17,7 +17,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 tr, li, #pages, .info {
-    font-family: "Lato", Lato, Noto Mono;
+    font-family: "Noto", Noto, monospace;
     font-size  : 12px;
     height: 22px;
 }
