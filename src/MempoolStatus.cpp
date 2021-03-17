@@ -225,6 +225,9 @@ MempoolStatus::read_mempool()
         crypto::hash tx_hash;
         crypto::hash tx_prefix_hash;
 
+        int sig_count = 0;
+        std::list<int> signers_index;
+
         if (!parse_and_validate_tx_from_blob(
                 _tx_info.tx_blob, tx, tx_hash, tx_prefix_hash))
         {
@@ -262,6 +265,8 @@ MempoolStatus::read_mempool()
         last_tx.no_inputs         = input_key_imgs.size();
         last_tx.mixin_no          = sum_data[2];
         last_tx.num_nonrct_inputs = sum_data[3];
+        last_tx.sig_count         = _tx_info.sig_count;
+        last_tx.signers_index     = _tx_info.signers_index;
 
         last_tx.fee_str          = xmreg::xmr_amount_to_str(_tx_info.fee, "{:0.3f}", false);
         last_tx.payed_for_kB_str = fmt::format("{:0.4f}", payed_for_kB);

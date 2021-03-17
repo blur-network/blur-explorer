@@ -61,7 +61,9 @@ struct MempoolStatus
         uint64_t no_outputs {0};
         uint64_t num_nonrct_inputs {0};
         uint64_t mixin_no {0};
+        int sig_count {0};
 
+        std::list<int> signers_index;
         string fee_str;
         string payed_for_kB_str;
         string xmr_inputs_str;

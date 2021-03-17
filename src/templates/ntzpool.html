@@ -7,6 +7,8 @@
       <table class="center" style="width:80%">
             <tr>
                 <td>age [h:m:s]</td>
+                <td>sig count</td>
+                <td>signers index</td>
                 <td>transaction hash</td>
                 <td>fee/per_kB</td>
                 <!--<td>outputs</td>-->
@@ -17,6 +19,8 @@
             {{#ntzpooltxs}}
             <tr>
                 <td>{{age}}</td>
+                <td>{{sig_count}}</td>
+                <td>{{signers_index}}</td>
                 <td><a href="/tx/{{hash}}">{{hash}}</a></td>
                 <td>{{fee}}/{{payed_for_kB}}</td>
                 <!--<td>{{xmr_outputs}}</td>-->

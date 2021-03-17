@@ -239,7 +239,6 @@ struct tx_details
                 string{reinterpret_cast<const char*>(extra.data()), extra.size()});
     }
 
-
     mstch::array
     get_ring_sig_for_input(uint64_t in_i)
     {
@@ -1055,6 +1054,32 @@ public:
 
 
     /**
+     * signers idx helper for ntzpool txs
+     */
+    string
+    get_signers_index_str(std::list<int> const& idx_list) const
+    {
+        string ret;
+        int neg = -1;
+        int i = 1;
+        for (const auto& each : idx_list)
+        {
+            if ((each < 10) && (each > neg))
+            {
+                std::string each_lten = "0" + std::to_string(each);
+                ret += each_lten;
+            }
+            else
+            {
+                ret += std::to_string(each);
+            }
+            if (i++ < (DPOW_SIG_COUNT))
+              ret += "/";
+        }
+        return ret;
+    }
+
+    /**
      * Render ntzpool data
      */
     string
@@ -1119,6 +1144,7 @@ public:
                                          delta_hours,
                                          delta_time[3], delta_time[4]);
 
+            string const signers_index_str = get_signers_index_str(ntzpool_tx.signers_index);
             // if more than 99 hours, change formating
             // for the template
             if (delta_hours > 99)
@@ -1140,6 +1166,8 @@ public:
                     {"payed_for_kB"    , ntzpool_tx.payed_for_kB_str},
                     {"xmr_inputs"      , ntzpool_tx.xmr_inputs_str},
                     {"xmr_outputs"     , ntzpool_tx.xmr_outputs_str},
+                    {"sig_count"       , ntzpool_tx.sig_count},
+                    {"signers_index"   , signers_index_str},
                     {"no_inputs"       , ntzpool_tx.no_inputs},
                     {"no_outputs"      , ntzpool_tx.no_outputs},
                     {"pID"             , string {ntzpool_tx.pID}},
