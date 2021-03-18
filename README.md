@@ -1,5 +1,8 @@
 ## Blur Network Block Explorer features
 
+**Default branch is currently for use with** `dpow-blur` **repository and testnet daemon**.
+Please use https://github.com/blur-network/blur-explorer/tree/master for the mainnet explorer.
+
 The key features of the Blur Network Block Explorer are:
 
  - no cookies, no web analytics trackers, no external images
