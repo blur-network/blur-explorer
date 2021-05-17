@@ -189,9 +189,6 @@ MicroCore::get_tx(const string& tx_hash_str, transaction& tx)
     return true;
 }
 
-
-
-
 /**
  * Find output with given public key in a given transaction
  */

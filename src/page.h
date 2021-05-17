@@ -5704,19 +5704,20 @@ private:
     {
 
         json j_tx {
-                {"tx_hash"     , pod_to_hex(txd.hash)},
-                {"tx_fee"      , txd.fee},
-                {"mixin"       , txd.mixin_no},
-                {"tx_size"     , txd.size},
-                {"xmr_outputs" , txd.xmr_outputs},
-                {"xmr_inputs"  , txd.xmr_inputs},
-                {"tx_version"  , static_cast<uint64_t>(txd.version)},
-                {"rct_type"    , tx.rct_signatures.type},
-                {"coinbase"    , is_coinbase(tx)},
-                {"mixin"       , txd.mixin_no},
-                {"extra"       , txd.get_extra_str()},
-                {"payment_id"  , (txd.payment_id  != null_hash  ? pod_to_hex(txd.payment_id)  : "")},
-                {"payment_id8" , (txd.payment_id8 != null_hash8 ? pod_to_hex(txd.payment_id8) : "")},
+                {"tx_hash"       , pod_to_hex(txd.hash)},
+                {"tx_fee"        , txd.fee},
+                {"mixin"         , txd.mixin_no},
+                {"tx_size"       , txd.size},
+                {"xmr_outputs"   , txd.xmr_outputs},
+                {"xmr_inputs"    , txd.xmr_inputs},
+                {"tx_version"    , static_cast<uint64_t>(txd.version)},
+                {"rct_type"      , tx.rct_signatures.type},
+                {"coinbase"      , is_coinbase(tx)},
+                {"mixin"         , txd.mixin_no},
+                {"extra"         , txd.get_extra_str()},
+                {"embedded_hash" , txd.embedded_hash},
+                {"payment_id"    , (txd.payment_id  != null_hash  ? pod_to_hex(txd.payment_id)  : "")},
+                {"payment_id8"   , (txd.payment_id8 != null_hash8 ? pod_to_hex(txd.payment_id8) : "")},
         };
 
         return j_tx;
@@ -5898,6 +5899,7 @@ private:
                 {"payment_id_as_ascii"   , remove_bad_chars(txd.payment_id_as_ascii)},
                 {"payment_id8"           , pid8_str},
                 {"extra"                 , txd.get_extra_str()},
+                {"embedded_hash"         , txd.embedded_hash},
                 {"with_ring_signatures"  , static_cast<bool>(
                                                    with_ring_signatures)},
                 {"tx_json"               , tx_json},
