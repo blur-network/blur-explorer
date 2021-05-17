@@ -210,8 +210,10 @@ vector<txin_to_key>
 get_key_images(const transaction& tx);
 
 bool
-get_embedded_raw_tx_hash(const std::vector<uint8_t>& extra,
-                         std::string& raw_src_tx_hash);
+get_embedded_raw_tx_data(const std::vector<uint8_t>& extra,
+                         std::string& raw_src_tx_hash,
+                         std::string& srchash,
+                         uint64_t& height);
 
 bool
 get_payment_id(const vector<uint8_t>& extra,

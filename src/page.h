@@ -158,6 +158,8 @@ struct tx_details
     uint64_t no_confirmations;
     vector<uint8_t> extra;
     std::string embedded_hash;
+    uint64_t ntz_blur_height;
+    std::string ntz_blur_hash;
 
     crypto::hash  payment_id  = null_hash; // normal
     crypto::hash8 payment_id8 = null_hash8; // encrypted
@@ -222,6 +224,8 @@ struct tx_details
                 {"confirmations"     , no_confirmations},
                 {"extra"             , get_extra_str()},
                 {"embedded_hash"     , embedded_hash},
+                {"ntz_blur_height"   , ntz_blur_height},
+                {"ntz_blur_hash"     , ntz_blur_hash},
                 {"payment_id8"       , pod_to_hex(payment_id8)},
                 {"unlock_time"       , unlock_time},
                 {"tx_size"           , fmt::format("{:0.4f}", tx_size)},
@@ -767,20 +771,18 @@ public:
 
                     const tx_details& txd = get_tx_details(tx, false, i, height);
 
-                    //std::string embedded_tx_hash;
-                    //if(!mcore->get_embedded_raw_tx_hash(tx.extra, embedded_tx_hash))
-                    //    embedded_tx_hash = "N/A";
-
                     mstch::map txd_map = txd.get_mstch_map();
 
                     //add age to the txd mstch map
-                    txd_map.insert({"height"       , i});
-                    txd_map.insert({"blk_hash"     , blk_hash_str});
-                    txd_map.insert({"age"          , age.first});
-                    txd_map.insert({"is_ringct"    , (tx.version >= 1)});
-                    txd_map.insert({"rct_type"     , tx.rct_signatures.type});
-                    txd_map.insert({"blk_size"     , blk_size_str});
-                    txd_map.insert({"embedded_hash", txd.embedded_hash});
+                    txd_map.insert({"height"         , i});
+                    txd_map.insert({"blk_hash"       , blk_hash_str});
+                    txd_map.insert({"age"            , age.first});
+                    txd_map.insert({"is_ringct"      , (tx.version >= 1)});
+                    txd_map.insert({"rct_type"       , tx.rct_signatures.type});
+                    txd_map.insert({"blk_size"       , blk_size_str});
+                    txd_map.insert({"embedded_hash"  , txd.embedded_hash});
+                    txd_map.insert({"ntz_blur_height", txd.ntz_blur_height});
+                    txd_map.insert({"ntz_blur_hash"  , txd.ntz_blur_hash});
 
 
                     // do not show block info for other than first tx in a block
@@ -5704,20 +5706,22 @@ private:
     {
 
         json j_tx {
-                {"tx_hash"       , pod_to_hex(txd.hash)},
-                {"tx_fee"        , txd.fee},
-                {"mixin"         , txd.mixin_no},
-                {"tx_size"       , txd.size},
-                {"xmr_outputs"   , txd.xmr_outputs},
-                {"xmr_inputs"    , txd.xmr_inputs},
-                {"tx_version"    , static_cast<uint64_t>(txd.version)},
-                {"rct_type"      , tx.rct_signatures.type},
-                {"coinbase"      , is_coinbase(tx)},
-                {"mixin"         , txd.mixin_no},
-                {"extra"         , txd.get_extra_str()},
-                {"embedded_hash" , txd.embedded_hash},
-                {"payment_id"    , (txd.payment_id  != null_hash  ? pod_to_hex(txd.payment_id)  : "")},
-                {"payment_id8"   , (txd.payment_id8 != null_hash8 ? pod_to_hex(txd.payment_id8) : "")},
+                {"tx_hash"         , pod_to_hex(txd.hash)},
+                {"tx_fee"          , txd.fee},
+                {"mixin"           , txd.mixin_no},
+                {"tx_size"         , txd.size},
+                {"xmr_outputs"     , txd.xmr_outputs},
+                {"xmr_inputs"      , txd.xmr_inputs},
+                {"tx_version"      , static_cast<uint64_t>(txd.version)},
+                {"rct_type"        , tx.rct_signatures.type},
+                {"coinbase"        , is_coinbase(tx)},
+                {"mixin"           , txd.mixin_no},
+                {"extra"           , txd.get_extra_str()},
+                {"embedded_hash"   , txd.embedded_hash},
+                {"ntz_blur_height" , txd.ntz_blur_height},
+                {"ntz_blur_hash" , txd.ntz_blur_hash},
+                {"payment_id"      , (txd.payment_id  != null_hash  ? pod_to_hex(txd.payment_id)  : "")},
+                {"payment_id8"     , (txd.payment_id8 != null_hash8 ? pod_to_hex(txd.payment_id8) : "")},
         };
 
         return j_tx;
@@ -5900,6 +5904,8 @@ private:
                 {"payment_id8"           , pid8_str},
                 {"extra"                 , txd.get_extra_str()},
                 {"embedded_hash"         , txd.embedded_hash},
+                {"ntz_blur_height"         , txd.ntz_blur_height},
+                {"ntz_blur_hash"         , txd.ntz_blur_hash},
                 {"with_ring_signatures"  , static_cast<bool>(
                                                    with_ring_signatures)},
                 {"tx_json"               , tx_json},
@@ -6358,7 +6364,7 @@ private:
 
         txd.extra = tx.extra;
 
-        xmreg::get_embedded_raw_tx_hash(tx.extra, txd.embedded_hash);
+        xmreg::get_embedded_raw_tx_data(tx.extra, txd.embedded_hash, txd.ntz_blur_hash, txd.ntz_blur_height);
 
         if (txd.payment_id != null_hash)
         {

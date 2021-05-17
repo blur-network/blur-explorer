@@ -772,8 +772,10 @@ get_key_images(const transaction& tx)
 }
 
 bool
-get_embedded_raw_tx_hash(const std::vector<uint8_t>& extra,
-                      std::string& raw_src_tx_hash)
+get_embedded_raw_tx_data(const std::vector<uint8_t>& extra,
+                      std::string& raw_src_tx_hash,
+                      std::string& srchash,
+                      uint64_t& height)
 {
     std::vector<uint8_t> placeholder_extra;
     std::vector<uint8_t> ntz_data_vec;
@@ -784,8 +786,7 @@ get_embedded_raw_tx_hash(const std::vector<uint8_t>& extra,
         return false;
     }
 
-    std::string opreturn, srchash, desthash, symbol;
-    uint64_t height = 0;
+    std::string opreturn, desthash, symbol;
     if (!extract_and_parse_opreturn(raw_src_tx, opreturn, raw_src_tx_hash, srchash, desthash, height, symbol))
     {
         cerr << "Failed to extract_and_parse_opreturn!";
