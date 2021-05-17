@@ -157,6 +157,7 @@ struct tx_details
     uint64_t unlock_time;
     uint64_t no_confirmations;
     vector<uint8_t> extra;
+    std::string embedded_hash;
 
     crypto::hash  payment_id  = null_hash; // normal
     crypto::hash8 payment_id8 = null_hash8; // encrypted
@@ -220,6 +221,7 @@ struct tx_details
                 {"payment_id"        , pod_to_hex(payment_id)},
                 {"confirmations"     , no_confirmations},
                 {"extra"             , get_extra_str()},
+                {"embedded_hash"     , embedded_hash},
                 {"payment_id8"       , pod_to_hex(payment_id8)},
                 {"unlock_time"       , unlock_time},
                 {"tx_size"           , fmt::format("{:0.4f}", tx_size)},
@@ -765,15 +767,20 @@ public:
 
                     const tx_details& txd = get_tx_details(tx, false, i, height);
 
+                    //std::string embedded_tx_hash;
+                    //if(!mcore->get_embedded_raw_tx_hash(tx.extra, embedded_tx_hash))
+                    //    embedded_tx_hash = "N/A";
+
                     mstch::map txd_map = txd.get_mstch_map();
 
                     //add age to the txd mstch map
-                    txd_map.insert({"height"    , i});
-                    txd_map.insert({"blk_hash"  , blk_hash_str});
-                    txd_map.insert({"age"       , age.first});
-                    txd_map.insert({"is_ringct" , (tx.version >= 1)});
-                    txd_map.insert({"rct_type"  , tx.rct_signatures.type});
-                    txd_map.insert({"blk_size"  , blk_size_str});
+                    txd_map.insert({"height"       , i});
+                    txd_map.insert({"blk_hash"     , blk_hash_str});
+                    txd_map.insert({"age"          , age.first});
+                    txd_map.insert({"is_ringct"    , (tx.version >= 1)});
+                    txd_map.insert({"rct_type"     , tx.rct_signatures.type});
+                    txd_map.insert({"blk_size"     , blk_size_str});
+                    txd_map.insert({"embedded_hash", txd.embedded_hash});
 
 
                     // do not show block info for other than first tx in a block
@@ -6348,6 +6355,8 @@ private:
         txd.size = get_object_blobsize(tx);
 
         txd.extra = tx.extra;
+
+        xmreg::get_embedded_raw_tx_hash(tx.extra, txd.embedded_hash);
 
         if (txd.payment_id != null_hash)
         {

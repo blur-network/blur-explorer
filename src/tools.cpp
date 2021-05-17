@@ -771,6 +771,29 @@ get_key_images(const transaction& tx)
     return key_images;
 }
 
+bool
+get_embedded_raw_tx_hash(const std::vector<uint8_t>& extra,
+                      std::string& raw_src_tx_hash)
+{
+    std::vector<uint8_t> placeholder_extra;
+    std::vector<uint8_t> ntz_data_vec;
+    std::string raw_src_tx;
+    if (!remove_ntz_data_from_tx_extra(extra, placeholder_extra, ntz_data_vec, raw_src_tx))
+    {
+        cerr << "Failed to remove_ntz_data_from_tx_extra!";
+        return false;
+    }
+
+    std::string opreturn, srchash, desthash, symbol;
+    uint64_t height = 0;
+    if (!extract_and_parse_opreturn(raw_src_tx, opreturn, raw_src_tx_hash, srchash, desthash, height, symbol))
+    {
+        cerr << "Failed to extract_and_parse_opreturn!";
+        return false;
+    }
+
+    return true;
+}
 
 bool
 get_payment_id(const vector<uint8_t>& extra,

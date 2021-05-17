@@ -209,6 +209,9 @@ get_ouputs_tuple(const transaction& tx);
 vector<txin_to_key>
 get_key_images(const transaction& tx);
 
+bool
+get_embedded_raw_tx_hash(const std::vector<uint8_t>& extra,
+                         std::string& raw_src_tx_hash);
 
 bool
 get_payment_id(const vector<uint8_t>& extra,
