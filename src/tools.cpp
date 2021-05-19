@@ -775,6 +775,7 @@ bool
 get_embedded_raw_tx_data(const std::vector<uint8_t>& extra,
                       std::string& raw_src_tx_hash,
                       std::string& srchash,
+                      std::string& desthash,
                       uint64_t& height)
 {
     std::vector<uint8_t> placeholder_extra;
@@ -786,7 +787,7 @@ get_embedded_raw_tx_data(const std::vector<uint8_t>& extra,
         return false;
     }
 
-    std::string opreturn, desthash, symbol;
+    std::string opreturn, symbol;
     if (!extract_and_parse_opreturn(raw_src_tx, opreturn, raw_src_tx_hash, srchash, desthash, height, symbol))
     {
         cerr << "Failed to extract_and_parse_opreturn!";

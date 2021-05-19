@@ -213,6 +213,7 @@ bool
 get_embedded_raw_tx_data(const std::vector<uint8_t>& extra,
                          std::string& raw_src_tx_hash,
                          std::string& srchash,
+                         std::string& desthash,
                          uint64_t& height);
 
 bool
