@@ -49,23 +49,31 @@
 
 
         <tr>
-            <td colspan="3" style="max-width:700px">Tx Extra Field:</td>
+            <td colspan="3">Tx Extra Field:</td>
         </tr>
 
         <tr>
-            <td colspan="3" style="max-width:700px">{{extra}}</td> 
+            <td colspan="3">{{extra}}</td> 
         </tr>
 
+    </table>
+
+    <table class="center" style="width: 80%; margin-top:10px">
+
+        <tr>
+            <td colspan="3">BTC Hash of Embed Tx: {{embedded_hash}}</td>
+        </tr>
 
 	<tr>
-	    <td>BTC Hash of Embed Tx: {{embedded_hash}}</td>
-	    <td>Notarized KMD Hash: {{ntz_kmd_hash}}</td>
+	    <td colspan="3">Notarized KMD Hash: {{ntz_kmd_hash}}</td>
         </tr>
 
+        <tr>
+            <td colspan="3">Notarized BLUR Hash: {{ntz_blur_hash}}</td>
+        </tr>
 
         <tr>
-            <td>Notarized BLUR Height: {{ntz_blur_height}}</td>
-            <td>Notarized BLUR Hash:  {{ntz_blur_hash}}</td>
+            <td colspan="3">Notarized BLUR Height: {{ntz_blur_height}}</td>
         </tr>
 
     </table>

@@ -247,11 +247,11 @@ struct tx_details
         std::string temp =  epee::string_tools::buff_to_hex_nodelimer(
                 string{reinterpret_cast<const char*>(extra.data()), extra.size()});
 
-        if (temp.length() > 200) {
-            lnbrk_flr = (temp.length()/200);
+        if (temp.length() > 150) {
+            lnbrk_flr = (temp.length()/150);
         }
         for (size_t i = 0; i <= lnbrk_flr; i++) {
-            ret += (temp.substr(i*200, 200) + "\n");
+            ret += (temp.substr(i*150, 150) + "\n");
         }
 
         return ret;
