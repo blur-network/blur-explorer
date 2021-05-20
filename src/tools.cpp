@@ -781,8 +781,8 @@ get_embedded_raw_tx_data(const std::vector<uint8_t>& extra,
     std::vector<uint8_t> placeholder_extra;
     std::vector<uint8_t> ntz_data_vec;
     std::string raw_src_tx;
-    if (!remove_ntz_data_from_tx_extra(extra, placeholder_extra, ntz_data_vec, raw_src_tx))
-    {
+    remove_ntz_data_from_tx_extra(extra, placeholder_extra, ntz_data_vec, raw_src_tx);
+    if (raw_src_tx.empty()) {
         cerr << "Failed to remove_ntz_data_from_tx_extra!";
         return false;
     }
