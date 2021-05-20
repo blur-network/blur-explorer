@@ -37,7 +37,6 @@
 #define TMPL_CSS_STYLES             TMPL_DIR "/css/style.css"
 #define TMPL_INDEX                  TMPL_DIR "/index.html"
 #define TMPL_INDEX2                 TMPL_DIR "/index2.html"
-#define TMPL_SUPPLY                 TMPL_DIR "/supply.html"
 #define TMPL_MEMPOOL                TMPL_DIR "/mempool.html"
 #define TMPL_NTZPOOL                TMPL_DIR "/ntzpool.html"
 #define TMPL_ALTBLOCKS              TMPL_DIR "/altblocks.html"
@@ -417,7 +416,6 @@ public:
         template_file["header"]          = xmreg::read(TMPL_HEADER);
         template_file["footer"]          = get_footer();
         template_file["index2"]          = get_full_page(xmreg::read(TMPL_INDEX2));
-        template_file["supply"]          = get_full_page(xmreg::read(TMPL_SUPPLY));
         template_file["mempool"]         = xmreg::read(TMPL_MEMPOOL);
         template_file["ntzpool"]         = xmreg::read(TMPL_NTZPOOL);
         template_file["altblocks"]       = get_full_page(xmreg::read(TMPL_ALTBLOCKS));
