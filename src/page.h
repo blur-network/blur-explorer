@@ -157,8 +157,7 @@ struct tx_details
     uint64_t unlock_time;
     uint64_t no_confirmations;
     vector<uint8_t> extra;
-    uint64_t ntz_blur_height;
-    std::string embedded_hash, ntz_blur_hash, ntz_kmd_hash;
+    std::string embedded_hash, ntz_blur_hash, ntz_kmd_hash, ntz_blur_height;
 
     crypto::hash  payment_id  = null_hash; // normal
     crypto::hash8 payment_id8 = null_hash8; // encrypted
@@ -6367,7 +6366,26 @@ private:
 
         txd.extra = tx.extra;
 
-        xmreg::get_embedded_raw_tx_data(tx.extra, txd.embedded_hash, txd.ntz_blur_hash, txd.ntz_kmd_hash, txd.ntz_blur_height);
+        if (tx.version == DPOW_NOTA_TX_VERSION)
+        {
+            uint64_t ntz_blur_height = 0;
+            xmreg::get_embedded_raw_tx_data(tx.extra, txd.embedded_hash, txd.ntz_blur_hash, txd.ntz_kmd_hash, ntz_blur_height);
+            txd.ntz_blur_height = std::to_string(ntz_blur_height);
+            if (txd.ntz_blur_hash.empty())
+            {
+                txd.embedded_hash = "N/A";
+                txd.ntz_blur_hash = "N/A";
+                txd.ntz_kmd_hash = "N/A";
+                txd.ntz_blur_height = "N/A";
+            }
+        }
+        else
+        {
+            txd.embedded_hash = "N/A";
+            txd.ntz_blur_hash = "N/A";
+            txd.ntz_kmd_hash = "N/A";
+            txd.ntz_blur_height = "N/A";
+        }
 
         if (txd.payment_id != null_hash)
         {
