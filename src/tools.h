@@ -214,7 +214,8 @@ get_embedded_raw_tx_data(const std::vector<uint8_t>& extra,
                          std::string& raw_src_tx_hash,
                          std::string& srchash,
                          std::string& desthash,
-                         uint64_t& height);
+                         uint64_t& height,
+                         std::string& signer_idx);
 
 bool
 get_payment_id(const vector<uint8_t>& extra,

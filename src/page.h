@@ -156,7 +156,7 @@ struct tx_details
     uint64_t unlock_time;
     uint64_t no_confirmations;
     vector<uint8_t> extra;
-    std::string embedded_hash, ntz_blur_hash, ntz_kmd_hash, ntz_blur_height;
+    std::string embedded_hash, ntz_blur_hash, ntz_kmd_hash, ntz_blur_height, ntz_signer_idx;
 
     crypto::hash  payment_id  = null_hash; // normal
     crypto::hash8 payment_id8 = null_hash8; // encrypted
@@ -224,6 +224,7 @@ struct tx_details
                 {"ntz_blur_height"   , ntz_blur_height},
                 {"ntz_blur_hash"     , ntz_blur_hash},
                 {"ntz_kmd_hash"      , ntz_kmd_hash},
+                {"ntz_signer_idx"    , ntz_signer_idx},
                 {"payment_id8"       , pod_to_hex(payment_id8)},
                 {"unlock_time"       , unlock_time},
                 {"tx_size"           , fmt::format("{:0.4f}", tx_size)},
@@ -780,7 +781,8 @@ public:
                     txd_map.insert({"embedded_hash"  , txd.embedded_hash});
                     txd_map.insert({"ntz_blur_height", txd.ntz_blur_height});
                     txd_map.insert({"ntz_blur_hash"  , txd.ntz_blur_hash});
-                    txd_map.insert({"ntz_kmd_hash"  , txd.ntz_kmd_hash});
+                    txd_map.insert({"ntz_kmd_hash"   , txd.ntz_kmd_hash});
+                    txd_map.insert({"ntz_signer_idx" , txd.ntz_signer_idx});
 
 
                     // do not show block info for other than first tx in a block
@@ -5719,6 +5721,7 @@ private:
                 {"ntz_blur_height" , txd.ntz_blur_height},
                 {"ntz_blur_hash"   , txd.ntz_blur_hash},
                 {"ntz_kmd_hash"    , txd.ntz_kmd_hash},
+                {"ntz_signer_idx"  , txd.ntz_signer_idx},
                 {"payment_id"      , (txd.payment_id  != null_hash  ? pod_to_hex(txd.payment_id)  : "")},
                 {"payment_id8"     , (txd.payment_id8 != null_hash8 ? pod_to_hex(txd.payment_id8) : "")},
         };
@@ -5906,6 +5909,7 @@ private:
                 {"ntz_blur_height"       , txd.ntz_blur_height},
                 {"ntz_blur_hash"         , txd.ntz_blur_hash},
                 {"ntz_kmd_hash"          , txd.ntz_kmd_hash},
+                {"ntz_signer_idx"        , txd.ntz_signer_idx},
                 {"with_ring_signatures"  , static_cast<bool>(
                                                    with_ring_signatures)},
                 {"tx_json"               , tx_json},
@@ -6367,7 +6371,7 @@ private:
         if (tx.version == DPOW_NOTA_TX_VERSION)
         {
             uint64_t ntz_blur_height = 0;
-            xmreg::get_embedded_raw_tx_data(tx.extra, txd.embedded_hash, txd.ntz_blur_hash, txd.ntz_kmd_hash, ntz_blur_height);
+            xmreg::get_embedded_raw_tx_data(tx.extra, txd.embedded_hash, txd.ntz_blur_hash, txd.ntz_kmd_hash, ntz_blur_height, txd.ntz_signer_idx);
             txd.ntz_blur_height = std::to_string(ntz_blur_height);
             if (txd.ntz_blur_hash.empty())
             {
@@ -6383,6 +6387,7 @@ private:
             txd.ntz_blur_hash = "N/A";
             txd.ntz_kmd_hash = "N/A";
             txd.ntz_blur_height = "N/A";
+            txd.ntz_signer_idx = "-1";
         }
 
         if (txd.payment_id != null_hash)

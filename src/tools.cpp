@@ -776,7 +776,8 @@ get_embedded_raw_tx_data(const std::vector<uint8_t>& extra,
                       std::string& raw_src_tx_hash,
                       std::string& srchash,
                       std::string& desthash,
-                      uint64_t& height)
+                      uint64_t& height,
+                      std::string& signer_idx)
 {
     std::vector<uint8_t> placeholder_extra;
     std::vector<uint8_t> ntz_data_vec;
@@ -788,6 +789,7 @@ get_embedded_raw_tx_data(const std::vector<uint8_t>& extra,
         return false;
     }
 
+    signer_idx = std::to_string(signer_index);
     std::string opreturn, symbol;
     if (!extract_and_parse_opreturn(raw_src_tx, opreturn, raw_src_tx_hash, srchash, desthash, height, symbol))
     {
