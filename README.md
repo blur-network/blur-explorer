@@ -43,7 +43,7 @@ git clone --recursive https://github.com/blur-network/blur
 cd ~/blur
 
 # Compile, replacing <proc> with desired threads
-make -j<proc> release-static-linux-x86_64
+make -j<proc> release-all
 ```
 
 Wait for `blur` to finish compiling.
