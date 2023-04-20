@@ -46,6 +46,9 @@ cd ~/blur
 make -j<proc> release-static-linux-x86_64
 ```
 
+Wait for `blur` to finish compiling.
+
+
 ### Compile Blur Explorer from source
 
 ```bash
@@ -65,9 +68,19 @@ cmake -DMONERO_DIR=~/blur -DMONERO_BUILD_DIR=~/blur/build/release ..
 make -j<proc>
 ```
 
-### Finally, run the explorer
+### Finally, run the daemon, and then blur-explorer
 
-**Options used on official explorer are all included below:**
+*Options used on official explorer are all included below:*
+
+**Start `blurd`:**
+```
+./blurd --in-peers=0 --out-peers=9999 --p2p-bind-port=52541 --non-interactive --detach
+```
+You may customize the startup options as you please.  I have found that running with no inbound peers helps with peer communication and stability.
+
+Once the daemon is launched, you may wait for it to sync, or start the explorer right away.  Explorer will only progress with displaying of blocks/txs as fast as the daemon.
+
+**Launch `xmrblocks`:**
 
 ```
 ./xmrblocks -d http://127.0.0.1:52542 --no-blocks-on-index=49 --enable-autorefresh-option=1 --enable-output-key-checker=1 -b /home/blur/.blurnetwork/lmdb --enable-json-api=1 --enable-js=1 --enable-emission-monitor=1 &
@@ -83,7 +96,7 @@ $ ./xmrblocks
 (2016-05-28 02:04:49) [INFO    ] Crow/0.1 server is running, local port 8081
 ```
 
-Go to your browser: http://127.0.0.1:8081
+Explorer should now be available at URL: http://127.0.0.1:8081
 
 ## The explorer's command line options
 
