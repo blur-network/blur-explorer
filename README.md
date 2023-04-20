@@ -1,99 +1,82 @@
-## Blur Network Block Explorer features
+# Blur Network Block Explorer
 
 The key features of the Blur Network Block Explorer are:
 
  - no cookies, no web analytics trackers, no external images
  - image in header is a png that has been base64 encoded
  - Javascipt enabled for client side decoding and proving transactions, but not enabled by default
- - open sourced,
- - made fully in C++,
- - showing encrypted payments ID,
- - showing ring signatures,
- - showing transaction extra field,
- - showing public components of Monero addresses,
- - decoding which outputs and mixins belong to the given Monero address and viewkey,
- - can prove that you send Monero to someone,
- - detailed information about mixins, such as, mixins' age, timescale, mixin of mixins,
- - showing number of amount output indices,
- - support Monero testnet network,
- - tx checker and pusher for online pushing of transactions,
- - estimate possible spendings based on address and viewkey,
- - can provide total amount of all miner fees.
- - decoding encrypted payment id.
- - decoding outputs and proving txs sent to sub-address.
+ - open sourced
+ - made fully in C++
+ - showing encrypted payments ID
+ - showing ring signatures
+ - showing transaction extra field
+ - showing public components of Monero addresses
+ - decoding which outputs and mixins belong to the given Monero address and viewkey
+ - can prove that you send Monero to someone
+ - detailed information about mixins, such as, mixins' age, timescale, mixin of mixins
+ - showing number of amount output indices
+ - support Monero testnet network
+ - tx checker and pusher for online pushing of transactions
+ - estimate possible spendings based on address and viewkey
+ - can provide total amount of all miner fees
+ - decoding encrypted payment id
+ - decoding outputs and proving txs sent to sub-address
 
 
-## Compilation on Ubuntu
+## Compilation
 
-##### Compile latest BLUR development version
+### Compile Blur from source
 
-Download and compile recent Blur source  into your home folder:
+**Guide below assumes we are compiling on Ubuntu 20.04.**
+
+Compile the latest release of `blur` repository, or `master` branch:
 
 
 ```bash
-# first install blur dependecines
+# Install deps for blur
 sudo apt update
+sudo apt-get install -y git build-essential cmake pkg-config libboost-all-dev libssl-dev libsodium-dev libunwind-dev binutils-dev libreadline-dev
 
-sudo apt-get install git build-essential cmake libboost-all-dev miniupnpc libunbound-dev graphviz doxygen libunwind8-dev pkg-config libssl-dev libcurl4-openssl-dev libgtest-dev libreadline-dev libzmq3-dev libsodium-dev
-
-# go to home folder
+# Clone blur repository, recursively
 cd ~
-
 git clone --recursive https://github.com/blur-network/blur
+cd ~/blur
 
-cd blur
-
-# checkout last blur version
-git checkout -b last_release v0.1.1
-
-cmake . && make 
+# Compile, replacing <proc> with desired threads
+make -j<proc> release-static-linux-x86_64
 ```
 
-##### Compile and run the explorer
-
-Once the Blur is compiled, the explorer can be downloaded and compiled
-as follows:
+### Compile Blur Explorer from source
 
 ```bash
-# go to home folder if still in ~/blur
+# Clone explorer repo, master branch
 cd ~
-
-# download the source code
-git clone https://github.com/blur-network/blur-explorer.git
-
-# enter the downloaded sourced code folder
-cd blur-explorer
-
-# make a build folder and enter it
+git clone https://github.com/blur-network/blur-explorer.git --branch master
+cd ~/blur-explorer
 mkdir build && cd build
 
-# create the makefile
-cmake ..
+# Use CMake, specifying -DMONERO_DIR, and -DMONERO_BUILD_DIR
+cmake -DMONERO_DIR=~/blur -DMONERO_BUILD_DIR=~/blur/build/release ..
 
-# altearnatively can use: cmake -DMONERO_DIR=/path/to/blur_folder ..
-# if blur is not in ~/blur
-#
 # also can build with ASAN (sanitizers), for example
 # cmake -DSANITIZE_ADDRESS=On ..
 
-# compile
-make
+# Compile using Make
+make -j<proc>
 ```
 
-When compilation finishes executable `xmrblocks` should be created. Before running
-please make sure that  `~/Downloads` folder exists and is writable.
-Time zone library that explorer is using, puts there
-its database of time zone offsets
+### Finally, run the explorer
 
-To run it:
+**Options used on official explorer are all included below:**
+
 ```
-./xmrblocks
+./xmrblocks -d http://127.0.0.1:52542 --no-blocks-on-index=49 --enable-autorefresh-option=1 --enable-output-key-checker=1 -b /home/blur/.blurnetwork/lmdb --enable-json-api=1 --enable-js=1 --enable-emission-monitor=1 &
 ```
 
-By default it will look for blockchain in its default location i.e., `~/.blurnet/lmdb`.
-You can use `--bc-path` option if its in different location.
-Example output:
+If your LMDB database is located somewhere other than `~/.blurnetwork/lmdb`, you can specify its location using `-b` or `--bc-path`.
 
+
+Example Output:
 ```bash
 $ ./xmrblocks
 2016-May-28 10:04:49.160280 Blockchain initialized. last block: 1056761, d0.h0.m12.s47 time ago, current difficulty: 1517857750
