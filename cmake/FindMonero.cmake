@@ -62,8 +62,12 @@ if (EXISTS ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.a)
 	add_library(ringct_basic STATIC IMPORTED)
 	set_property(TARGET ringct_basic
 			PROPERTY IMPORTED_LOCATION ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.a)
+elseif (EXISTS ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.so)
+       message(STATUS FindMonero " found libringct_basic.so")
+       add_library(ringct_basic SHARED IMPORTED)
+       set_property(TARGET ringct_basic
+                       PROPERTY IMPORTED_LOCATION ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.so)
 endif()
-
 
 message(STATUS ${MONERO_SOURCE_DIR}/build)
 
