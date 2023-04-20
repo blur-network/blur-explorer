@@ -95,6 +95,7 @@ set(LIBRARIES
         mstch
         wallet
         blockchain_db
+        blocks
         cryptonote_core
         cryptonote_protocol
         cryptonote_basic
