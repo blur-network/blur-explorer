@@ -52,7 +52,11 @@ foreach (l ${LIBS})
 
 	message(STATUS FindMonero " Xmr_${L}_LIBRARIES ${Xmr_${L}_LIBRARY}")
 
+if (SHARED)
+	add_library(${l} SHARED IMPORTED)
+else()
 	add_library(${l} STATIC IMPORTED)
+endif()
 	set_property(TARGET ${l} PROPERTY IMPORTED_LOCATION ${Xmr_${L}_LIBRARIES})
 
 endforeach()

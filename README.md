@@ -59,7 +59,9 @@ cd ~/blur-explorer
 mkdir build && cd build
 
 # Use CMake, specifying -DMONERO_DIR, and -DMONERO_BUILD_DIR
-cmake -DMONERO_DIR=~/blur -DMONERO_BUILD_DIR=~/blur/build/release ..
+cmake -DMONERO_DIR=~/blur -DMONERO_BUILD_DIR=~/blur/build/release -DSHARED=1 ..
+
+# Omit -DSHARED option if you build blur statically
 
 # also can build with ASAN (sanitizers), for example
 # cmake -DSANITIZE_ADDRESS=On ..
